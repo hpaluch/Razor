@@ -27,7 +27,20 @@ module ProjectRazor::BrokerPlugin
       @options[:puppetagent_certname] ||= @options[:uuid].base62_decode.to_s(16)
       return false unless validate_options(@options, [:username, :password, :server, :ca_server, :puppetagent_certname, :ipaddress])
       @puppet_script = compile_template
-      init_agent(options)
+      ret = init_agent(options)
+      if ret == :broker_wait
+         system("puppet cert --sign #{options[:puppetagent_certname]}")
+      
+         begin
+		 Net::SSH.start(options[:ipaddress], options[:username], :password => options[:password]) do |session|
+		   session.exec!("bash /etc/init.d/puppet start")
+		 end
+         rescue => e
+           logger.error "puppet agent error: #{p e}"
+           return :broker_fail
+         end
+         :broker_success
+      end
     end
 
     def proxy_hand_off(options = {})
