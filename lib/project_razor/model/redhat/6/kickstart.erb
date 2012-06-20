@@ -26,10 +26,19 @@ reboot
 # followig is MINIMAL https://partner-bugzilla.redhat.com/show_bug.cgi?id=593309
 %packages --nobase
 @core
+# required by later script!
+curl
+# required by later broker agent (puppet ...)
+openssh-server
 
 %end
 
 %post --log=/root/razor-post.log
 cd /root
 curl <%= api_svc_uri %>/policy/callback/<%= policy_uuid %>/kickstart/end
+
+curl -o /usr/local/bin/razor_postinstall.sh <%= api_svc_uri %>/policy/callback/<%= policy_uuid %>/postinstall/inject && \
+echo >> /etc/rc.local && \
+echo bash /usr/local/bin/razor_postinstall.sh >> /etc/rc.local && \
+chmod +x /usr/local/bin/razor_postinstall.sh
 ############
