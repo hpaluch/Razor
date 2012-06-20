@@ -1,0 +1,12 @@
+{
+    "@name": "macaddress",
+    "@tag": "%V=macaddress_eth0-%",
+    "@tag_matchers": [
+        {
+            "@key": "macaddress",
+            "@value": "\\w+",
+            "@compare": "like",
+            "@inverse": "false"
+        }
+    ]
+}
