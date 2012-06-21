@@ -3,6 +3,7 @@
 # TODO - Make broker properties open rather than rigid
 require "erb"
 require "net/ssh"
+require 'socket'
 
 # Root namespace for ProjectRazor
 module ProjectRazor::BrokerPlugin
@@ -26,6 +27,18 @@ module ProjectRazor::BrokerPlugin
       @options[:ca_server] = @options[:server]
       @options[:puppetagent_certname] ||= @options[:uuid].base62_decode.to_s(16)
       return false unless validate_options(@options, [:username, :password, :server, :ca_server, :puppetagent_certname, :ipaddress])
+      # Add puppet server IP address to /etc/hosts
+      server_ip = '127.0.0.55' # fallback - avoid /etc/hosts corruption
+      begin
+         x = Socket.getaddrinfo(@options[:server],nil)
+         server_ip = x[0][2].to_s
+      rescue => e
+            puts "Unable to resolve #{options[:server]} to IP address: #{e}"
+            # FIXME: what to do now?
+      end
+      @options[:server_ip] = server_ip
+
+
       @puppet_script = compile_template
       ret = init_agent(options)
       if ret == :broker_wait

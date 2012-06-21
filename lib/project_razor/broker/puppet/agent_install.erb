@@ -39,6 +39,7 @@ START=yes
 DAEMON_OPTS=''
 EOFPUPPETDEFAULT
     fi
+    echo "<%= @options[:server_ip] %> <%= @options[:server] %>" >> /etc/hosts
 }
 
 function start_puppet() {
