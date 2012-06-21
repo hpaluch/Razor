@@ -28,22 +28,21 @@ module ProjectRazor::BrokerPlugin
       @options[:puppetagent_certname] ||= @options[:uuid].base62_decode.to_s(16)
       return false unless validate_options(@options, [:username, :password, :server, :ca_server, :puppetagent_certname, :ipaddress])
       # Add puppet server IP address to /etc/hosts
-      server_ip = '127.0.0.55' # fallback - avoid /etc/hosts corruption
-      begin
-         x = Socket.getaddrinfo(@options[:server],nil)
-         server_ip = x[0][2].to_s
-      rescue => e
-            puts "Unable to resolve #{options[:server]} to IP address: #{e}"
-            # FIXME: what to do now?
+      @options[:host_entries] = "# Puppet Servers\n"
+      @servers.each do |server|
+	      begin
+		 x = Socket.getaddrinfo(server,nil)
+		 server_ip = x[0][2].to_s
+		 @options[:host_entries] += "#{server_ip} #{server}\n"
+	      rescue => e
+		    puts "Unable to resolve #{server} to IP address: #{e}"
+		    @options[:host_entries] += "#Unknown_IP #{server}\n"
+	      end
       end
-      @options[:server_ip] = server_ip
-
-
       @puppet_script = compile_template
       ret = init_agent(options)
       if ret == :broker_wait
          system("puppet cert --sign #{options[:puppetagent_certname]}")
-      
          begin
 		 Net::SSH.start(options[:ipaddress], options[:username], :password => options[:password]) do |session|
 		   session.exec!("bash /etc/init.d/puppet start")
