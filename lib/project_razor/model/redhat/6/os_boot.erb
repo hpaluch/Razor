@@ -1,12 +1,11 @@
 #!/bin/bash
 
-# This is a patch for lack of DNS in my lab (Not needed if you have proper DNS, .nick)
-sed -i '4 i\
-192.168.99.50   puppet learn puppet.razor-dev.local learn.razor-dev.local' /etc/hosts
-
 rpm -q curl || yum -y install curl
-rpm -q puppetlabs-release ||  rpm -Uvh http://yum.puppetlabs.com/el/6/products/i386/puppetlabs-release-6-1.noarch.rpm
-[ "$?" -eq 0 ] && curl <%= callback_url("postinstall", "added_puppet_hosts_ok") %> || curl <%= callback_url("postinstall", "added_puppet_hosts_fail") %>
+# fail should never happen (because we call curl here :-)
+[ "$?" -eq 0 ] && curl <%= callback_url("postinstall", "install_curl_ok") %> || curl <%= callback_url("postinstall", "install_curl_fail") %>
+
+hrpm -q puppetlabs-release ||  rpm -Uvh http://yum.puppetlabs.com/el/6/products/i386/puppetlabs-release-6-1.noarch.rpm
+[ "$?" -eq 0 ] && curl <%= callback_url("postinstall", "add_puppet_repo_ok") %> || curl <%= callback_url("postinstall", "add_puppet_repo_fail") %>
 
 hostname <%= hostname %>
 [ "$?" -eq 0 ] && curl <%= callback_url("postinstall", "set_hostname_ok") %> || curl <%= callback_url("postinstall", "set_hostname_fail") %>
@@ -14,11 +13,11 @@ fgrep 127.0.1.2 /etc/hosts || \
   echo "127.0.1.2 <%= hostname %>" >> /etc/hosts
 
 yum -y update
-[ "$?" -eq 0 ] && curl <%= callback_url("postinstall", "apt_update_ok") %> || curl <%= callback_url("postinstall", "apt_update_fail") %>
+[ "$?" -eq 0 ] && curl <%= callback_url("postinstall", "yum_update_ok") %> || curl <%= callback_url("postinstall", "yum_update_fail") %>
 
 # these are needed even without puppet agent
 yum -y install rdoc facter rubygems
-[ "$?" -eq 0 ] && curl <%= callback_url("postinstall", "apt_install_ok") %> || curl <%= callback_url("postinstall", "apt_install_fail") %>
+[ "$?" -eq 0 ] && curl <%= callback_url("postinstall", "packages_install_ok") %> || curl <%= callback_url("postinstall", "packages_install_fail") %>
 
 # Get current IP
 node_ip=`facter ipaddress`

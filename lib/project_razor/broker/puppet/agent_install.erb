@@ -26,6 +26,8 @@ report = true
 ca_server = <%= @options[:ca_server] %>
 server = <%= @options[:server] %>
 certname = <%= @options[:puppetagent_certname] %>
+# aplikovat konfiguraci puppeta kazde 3minuty
+runinterval = 180
 EOFPUPPETCONF
 
     if [ -f /etc/default/puppet ]; then
@@ -39,6 +41,7 @@ START=yes
 DAEMON_OPTS=''
 EOFPUPPETDEFAULT
     fi
+    echo "<%= @options[:host_entries] %>" >> /etc/hosts
 }
 
 function start_puppet() {
