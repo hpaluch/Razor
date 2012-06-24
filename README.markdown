@@ -1,4 +1,15 @@
-# Project Razor
+# MODIFIED Project Razor
+
+## Note about modifications
+Here is my Fork of Razor project (Razor provides support for full OS instalation and Configuration via Network - it provides TFTP server to NetBoot installation media and support for so called "Broker" - for example Puppet Agent which can maintain whole OS after reboot). If you know Chef from Opscode, Razor is (Puppet's) equivalent for "knife" tool.
+
+My fork contains:
+
+* system tag for MAC address to provide per node targetting of Razor policies (default tags are too wide to target specified node)
+* fix for some Ubuntu model (it attempts to use curl before installing them)
+* enhancement for Ubuntu model (ensures that openssh-server is installed - it is necessary also for Puppet broker to work, because it configures Agent via SSH  connection to client node)
+* fixes and enhancements of RedHat(TM) model (original did not support Broker at all)
+* fixes of Puppet Broker (now supports both Debian based and Redhat based distibutions, automatic /etc/hosts registration of Puppet Servers, running puppet sign on server to allow agent to work, etc.)
 
 ## License
 
